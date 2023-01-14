@@ -1,4 +1,4 @@
-module github.com/rheactive/ray_marching_learn
+module rm3
 
 go 1.19
 

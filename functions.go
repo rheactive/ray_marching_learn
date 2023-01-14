@@ -3,33 +3,34 @@ package main
 import (
 	//"fmt"
 	"math"
-	"github.com/gen2brain/raylib-go/raylib"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-func dist_to_sphere(point rl.Vector3, sph sphere) float32 {
-	dist := rl.Vector3Distance(point, sph.center) - sph.radius
+func dist_to_sphere(point yds_vec, sph sphere) float64 {
+	dist := vec_64_dist(point, sph.center) - sph.radius
 	return dist
 }
 
-func dist_to_plane(point rl.Vector3, pln plane) float32 {
-	dist := rl.Vector3DotProduct(pln.normal, rl.Vector3Subtract(point, pln.point))
+func dist_to_plane(point yds_vec, pln plane) float64 {
+	dist := vec_64_dot(pln.normal, vec_64_sub(point, pln.point))
 	return dist
 }
 
-func color_transform (col rl.Vector3) rl.Color {
-	return rl.ColorFromNormalized(rl.NewVector4(col.X, col.Y, col.Z, 1))
+func color_transform(col yds_vec) rl.Color {
+	return rl.ColorFromNormalized(rl.NewVector4(float32(col.x), float32(col.y), float32(col.z), 1))
 }
 
-func canvas_to_viewport(u int32, v int32, ratio float32) rl.Vector3 {
-	return rl.Vector3Normalize(rl.NewVector3(float32(u) * ratio, float32(v) * ratio, VIEWPORT_DIST))
+func canvas_to_viewport(u int32, v int32, ratio float64) yds_vec {
+	return vec_64_normalize(vec_64_new(float64(u)*ratio, float64(v)*ratio, VIEWPORT_DIST))
 }
 
-func closest_dist(point rl.Vector3, spheres []sphere, planes []plane) (float32, int, string) {
+func closest_dist(point yds_vec, spheres []sphere, planes []plane) (float64, int, string) {
 	sphere_num := len(spheres)
 	plane_num := len(planes)
-	closest_dist := MAX_DIST;
+	closest_dist := MAX_DIST
 	obj := "space"
-	var id int;
+	var id int
 	for s := 0; s < sphere_num; s++ {
 		d := dist_to_sphere(point, spheres[s])
 		if d < closest_dist {
@@ -49,49 +50,48 @@ func closest_dist(point rl.Vector3, spheres []sphere, planes []plane) (float32, 
 	return closest_dist, id, obj
 }
 
-
 func light_sphere(
-	point rl.Vector3,
-	ray rl.Vector3,
+	point yds_vec,
+	ray yds_vec,
 	sph sphere,
 	spheres []sphere,
 	planes []plane,
-	lights []light_source) float32 {
-	var intensity float32 = 0
+	lights []light_source) float64 {
+	var intensity float64 = 0
 
-	normal := rl.Vector3Normalize(rl.Vector3Subtract(point, sph.center))
-	ldir := rl.NewVector3(0, 0, 0)
-	var n_dot_l float32 = 1
+	normal := vec_64_normalize(vec_64_sub(point, sph.center))
+	ldir := vec_64_new(0, 0, 0)
+	var n_dot_l float64 = 1
 
 	for l := 0; l < len(lights); l++ {
 		if lights[l].light == "ambient" {
 			intensity += lights[l].intensity
 		} else {
 			if lights[l].light == "point" {
-				ldir = rl.Vector3Normalize(rl.Vector3Subtract(lights[l].position, point)) 
-			} 
+				ldir = vec_64_normalize(vec_64_sub(lights[l].position, point))
+			}
 			if lights[l].light == "directional" {
 				ldir = lights[l].direction
 			}
-			n_dot_l = rl.Vector3DotProduct(normal, ldir)
+			n_dot_l = vec_64_dot(normal, ldir)
 			if n_dot_l > 0 {
 				if !march_ray_shadow(point, spheres, planes, lights[l], ldir) {
 					intensity += lights[l].intensity * n_dot_l
-					ref := rl.Vector3Subtract(
-						rl.Vector3Multiply(normal, 2 * rl.Vector3DotProduct(normal, ldir)), ldir)
-					ref_dot_ray := rl.Vector3DotProduct(ref, rl.Vector3Negate(ray))
-					
+					ref := vec_64_sub(
+						vec_64_mul(normal, 2*vec_64_dot(normal, ldir)), ldir)
+					ref_dot_ray := vec_64_dot(ref, vec_64_mul(ray, -1))
+
 					if ref_dot_ray > 0 {
-						intensity += lights[l].intensity * float32(
-							math.Pow(float64(ref_dot_ray), 
-							float64(sph.specularity)))
+						intensity += lights[l].intensity *
+							math.Pow(ref_dot_ray,
+								float64(sph.specularity))
 					}
 				}
-				
+
 			}
 
 		}
-		
+
 	}
 
 	if intensity > 1 {
@@ -102,47 +102,47 @@ func light_sphere(
 }
 
 func light_plane(
-	point rl.Vector3,
-	ray rl.Vector3, 
-	pln plane, 
+	point yds_vec,
+	ray yds_vec,
+	pln plane,
 	spheres []sphere,
 	planes []plane,
-	lights []light_source) float32 {
-	var intensity float32 = 0
+	lights []light_source) float64 {
+	var intensity float64 = 0
 
 	normal := pln.normal
 	ldir := normal
-	var n_dot_l float32 = 1
+	var n_dot_l float64 = 1
 
 	for l := 0; l < len(lights); l++ {
 		if lights[l].light == "ambient" {
 			intensity += lights[l].intensity
 		} else {
 			if lights[l].light == "point" {
-				ldir = rl.Vector3Normalize(rl.Vector3Subtract(lights[l].position, point)) 
-			} 
+				ldir = vec_64_normalize(vec_64_sub(lights[l].position, point))
+			}
 			if lights[l].light == "directional" {
 				ldir = lights[l].direction
 			}
-			n_dot_l = rl.Vector3DotProduct(normal, ldir)
+			n_dot_l = vec_64_dot(normal, ldir)
 			if n_dot_l > 0 {
 				if !march_ray_shadow(point, spheres, planes, lights[l], ldir) {
 					intensity += lights[l].intensity * n_dot_l
-					ref := rl.Vector3Subtract(
-						rl.Vector3Multiply(normal, 2 * rl.Vector3DotProduct(normal, ldir)), ldir)
-					ref_dot_ray := rl.Vector3DotProduct(ref, rl.Vector3Negate(ray))
-					
+					ref := vec_64_sub(
+						vec_64_mul(normal, 2*vec_64_dot(normal, ldir)), ldir)
+					ref_dot_ray := vec_64_dot(ref, vec_64_mul(ray, -1))
+
 					if ref_dot_ray > 0 {
-						intensity += lights[l].intensity * float32(
-							math.Pow(float64(ref_dot_ray), 
-							float64(pln.specularity)))
+						intensity += lights[l].intensity *
+							math.Pow(ref_dot_ray,
+								float64(pln.specularity))
 					}
 				}
-				
+
 			}
 
 		}
-		
+
 	}
 
 	if intensity > 1 {
@@ -153,42 +153,37 @@ func light_plane(
 }
 
 func march_ray_shadow(
-	point rl.Vector3, 
+	point yds_vec,
 	spheres []sphere,
 	planes []plane,
 	light light_source,
-	ldir rl.Vector3, 
-	) bool {
+	ldir yds_vec,
+) bool {
 	shadow := false
 
 	if light.light != "ambient" {
-		r := 20 * TOL
+		r := r0
 		rm := r_max
 
 		if light.light == "point" {
-			rm = rl.Vector3Distance(light.position, point)
+			rm = vec_64_dist(light.position, point)
 		}
 
-			point2 := rl.Vector3Add(point, rl.Vector3Multiply(ldir, r))
-			closest_d, _, obj := closest_dist(point2, spheres, planes)
+		point2 := vec_64_add(point, vec_64_mul(ldir, r))
+		closest_d, _, _ := closest_dist(point2, spheres, planes)
 
 		it := 0
 		for r < rm && closest_d > TOL && it < MAX_IT {
-			it ++
-			if closest_d < 0 {
-				shadow = true
-				break
-			} else {
-				r += closest_d
-				point2 = rl.Vector3Add(point2, rl.Vector3Multiply(ldir, r))
-				closest_d, _, obj = closest_dist(point2, spheres, planes)
-			}
+			it++
+			r += closest_d
+			point2 = vec_64_add(point, vec_64_mul(ldir, r))
+			closest_d, _, _ = closest_dist(point2, spheres, planes)
 		}
 
-		if obj == "sphere" {
+		if closest_d <= TOL {
 			shadow = true
 		}
 	}
-	
+
 	return shadow
 }

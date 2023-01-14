@@ -3,58 +3,58 @@ package main
 import (
 	//"fmt"
 	"math"
-	"github.com/gen2brain/raylib-go/raylib"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 func march_ray_camera(
-	origin rl.Vector3, 
-	ray rl.Vector3, 
+	origin yds_vec,
+	ray yds_vec,
 	spheres []sphere,
-	planes []plane, 
+	planes []plane,
 	lights []light_source,
-	) rl.Vector3 {
+) yds_vec {
 	r := r_min
-	point := rl.Vector3Add(origin, rl.Vector3Multiply(ray, r))
-	color := rl.NewVector3(1, 1, 1)
-	
+	point := vec_64_add(origin, vec_64_mul(ray, r))
+	color := vec_64_new(1, 1, 1)
+
 	closest_d, id, obj := closest_dist(point, spheres, planes)
 
 	it := 0
 	for r < r_max && closest_d > TOL && it < MAX_IT {
-		it ++
+		it++
 		r += closest_d
-		point = rl.Vector3Add(origin, rl.Vector3Multiply(ray, r))
+		point = vec_64_add(origin, vec_64_mul(ray, r))
 		closest_d, id, obj = closest_dist(point, spheres, planes)
 	}
 
 	if obj == "sphere" {
-		var intensity float32 = 0 
+		var intensity float64 = 0
 		intensity = light_sphere(point, ray, spheres[id], spheres, planes, lights)
-		color = rl.Vector3Multiply(spheres[id].color, intensity)
+		color = vec_64_mul(spheres[id].color, intensity)
 	}
 
 	if obj == "plane" {
-		var intensity float32 = 0 
+		var intensity float64 = 0
 		intensity = light_plane(point, ray, planes[id], spheres, planes, lights)
-		color = rl.Vector3Multiply(planes[id].color , intensity)
+		color = vec_64_mul(planes[id].color, intensity)
 	}
-		
 
 	return color
 }
 
 func main() {
 
-	viewport_width := 2 * VIEWPORT_DIST * float32(math.Tan(HALF_FOV))
-	ratio := viewport_width / float32(SCREEN_WIDTH)
-	origin := rl.NewVector3(0, 0, 0)
-	ray := rl.NewVector3(0, 0, 0)
+	viewport_width := 2 * VIEWPORT_DIST * math.Tan(HALF_FOV)
+	ratio := viewport_width / float64(SCREEN_WIDTH)
+	origin := vec_64_new(0, 0, 0)
+	ray := vec_64_new(0, 0, 0)
 	canvas := rl.GenImageColor(int(SCREEN_WIDTH), int(SCREEN_HEIGHT), rl.Black)
-	color := rl.NewVector3(1, 1, 1)
+	color := vec_64_new(1, 1, 1)
 
 	rl.ExportImage(*canvas, "render_blank.png")
 
-	lights := makeSceneLights ()
+	lights := makeSceneLights()
 
 	spheres := makeSceneSpheres()
 
@@ -64,9 +64,9 @@ func main() {
 		for v := -HALF_HEIGHT; v < HALF_HEIGHT; v++ {
 			ray = canvas_to_viewport(u, v, ratio)
 			color = march_ray_camera(origin, ray, spheres, planes, lights)
-			rl.ImageDrawPixel(canvas, 
-				HALF_WIDTH + u, 
-				HALF_HEIGHT - v, 
+			rl.ImageDrawPixel(canvas,
+				HALF_WIDTH+u,
+				HALF_HEIGHT-v,
 				color_transform(color))
 		}
 	}
