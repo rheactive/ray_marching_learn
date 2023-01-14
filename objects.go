@@ -51,7 +51,7 @@ func makeSceneSpheres () []sphere {
 	spheres[0] = sphere{
 		center: rl.NewVector3(0, -1, 3.5),
 		radius: 1,
-		color: rl.NewVector3(0, 0.3, 1),
+		color: rl.NewVector3(0.5, 0.3, 1),
 		specularity: 300,
 	}
 
@@ -63,8 +63,8 @@ func makeSceneSpheres () []sphere {
 	}
 
 	spheres[2] = sphere{
-		center: rl.NewVector3(-2.7, 0, 5.5),
-		radius: 1,
+		center: rl.NewVector3(-2, 0, 6),
+		radius: 1.3,
 		color: rl.NewVector3(1, 1, 0),
 		specularity: 700,
 	}
@@ -102,13 +102,13 @@ func makeScenePlanes () []plane {
 func makeSceneLights () []light_source {
 	lights := make([]light_source, 3)
 
-	lights[0] = *new_light_source("ambient", 0.1)
+	lights[0] = *new_light_source("ambient", 0.2)
 
-	lights[1] = *new_light_source("point", 0.5)
-	lights[1].position = rl.NewVector3(4, 4, -4)
+	lights[1] = *new_light_source("directional", 0.4)
+	lights[1].direction = rl.Vector3Normalize(rl.NewVector3(1, 0.5, -1))
 
-	lights[2] = *new_light_source("directional", 0.4)
-	lights[2].direction = rl.Vector3Normalize(rl.NewVector3(1, 1, 0))
+	lights[2] = *new_light_source("point", 0.4)
+	lights[2].position = rl.NewVector3(4, 3, 2)
 
 	return lights
 }

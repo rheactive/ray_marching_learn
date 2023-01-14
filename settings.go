@@ -16,7 +16,7 @@ const FOV = PI / 2.5
 const HALF_FOV = FOV / 2
 
 const MAX_DIST float32 = VIEWPORT_DIST * 50
-const TOL float32 = 1e-2
+const TOL float32 = 1e-3
 const MAX_IT int = 100
 
 const r_min float32 = VIEWPORT_DIST

@@ -6,24 +6,7 @@ import (
 	"github.com/gen2brain/raylib-go/raylib"
 )
 
-func dist_to_sphere(point rl.Vector3, sph sphere) float32 {
-	return rl.Vector3Distance(point, sph.center) - sph.radius
-}
-
-func dist_to_plane(point rl.Vector3, pln plane) float32 {
-	return rl.Vector3DotProduct(pln.normal, rl.Vector3Subtract(point, pln.point))
-	
-}
-
-func color_transform (col rl.Vector3) rl.Color {
-	return rl.ColorFromNormalized(rl.NewVector4(col.X, col.Y, col.Z, 1))
-}
-
-func canvas_to_viewport(u int32, v int32, ratio float32) rl.Vector3 {
-	return rl.Vector3Normalize(rl.NewVector3(float32(u) * ratio, float32(v) * ratio, VIEWPORT_DIST))
-}
-
-func march_ray(
+func march_ray_camera(
 	origin rl.Vector3, 
 	ray rl.Vector3, 
 	spheres []sphere,
@@ -45,12 +28,14 @@ func march_ray(
 	}
 
 	if obj == "sphere" {
-		intensity := light_sphere(point, ray, spheres[id], lights)
-		color = rl.Vector3Multiply(spheres[id].color , intensity)
+		var intensity float32 = 0 
+		intensity = light_sphere(point, ray, spheres[id], spheres, planes, lights)
+		color = rl.Vector3Multiply(spheres[id].color, intensity)
 	}
 
 	if obj == "plane" {
-		intensity := light_plane(point, ray, planes[id], lights)
+		var intensity float32 = 0 
+		intensity = light_plane(point, ray, planes[id], spheres, planes, lights)
 		color = rl.Vector3Multiply(planes[id].color , intensity)
 	}
 		
@@ -78,7 +63,7 @@ func main() {
 	for u := -HALF_WIDTH; u < HALF_WIDTH; u++ {
 		for v := -HALF_HEIGHT; v < HALF_HEIGHT; v++ {
 			ray = canvas_to_viewport(u, v, ratio)
-			color = march_ray(origin, ray, spheres, planes, lights)
+			color = march_ray_camera(origin, ray, spheres, planes, lights)
 			rl.ImageDrawPixel(canvas, 
 				HALF_WIDTH + u, 
 				HALF_HEIGHT - v, 
