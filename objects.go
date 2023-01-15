@@ -3,8 +3,8 @@ package main
 type light_source struct {
 	light     string
 	intensity float64
-	position  yds_vec
-	direction yds_vec
+	position  vec_64
+	direction vec_64
 }
 
 func new_light_source(light string, intensity float64) *light_source {
@@ -17,20 +17,20 @@ func new_light_source(light string, intensity float64) *light_source {
 }
 
 type sphere struct {
-	center      yds_vec
+	center      vec_64
 	radius      float64
-	color       yds_vec
+	color       vec_64
 	specularity int
 }
 
 type plane struct {
-	normal      yds_vec
-	point       yds_vec
-	color       yds_vec
+	normal      vec_64
+	point       vec_64
+	color       vec_64
 	specularity int
 }
 
-func newPlane(normal yds_vec, point yds_vec, color yds_vec, specularity int) *plane {
+func newPlane(normal vec_64, point vec_64, color vec_64, specularity int) *plane {
 	return &plane{
 		normal:      vec_64_normalize(normal),
 		point:       point,

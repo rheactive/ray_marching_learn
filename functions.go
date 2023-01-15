@@ -7,25 +7,25 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-func dist_to_sphere(point yds_vec, sph sphere) float64 {
+func dist_to_sphere(point vec_64, sph sphere) float64 {
 	dist := vec_64_dist(point, sph.center) - sph.radius
 	return dist
 }
 
-func dist_to_plane(point yds_vec, pln plane) float64 {
+func dist_to_plane(point vec_64, pln plane) float64 {
 	dist := vec_64_dot(pln.normal, vec_64_sub(point, pln.point))
 	return dist
 }
 
-func color_transform(col yds_vec) rl.Color {
+func color_transform(col vec_64) rl.Color {
 	return rl.ColorFromNormalized(rl.NewVector4(float32(col.x), float32(col.y), float32(col.z), 1))
 }
 
-func canvas_to_viewport(u int32, v int32, ratio float64) yds_vec {
+func canvas_to_viewport(u int32, v int32, ratio float64) vec_64 {
 	return vec_64_normalize(vec_64_new(float64(u)*ratio, float64(v)*ratio, VIEWPORT_DIST))
 }
 
-func closest_dist(point yds_vec, spheres []sphere, planes []plane) (float64, int, string) {
+func closest_dist(point vec_64, spheres []sphere, planes []plane) (float64, int, string) {
 	sphere_num := len(spheres)
 	plane_num := len(planes)
 	closest_dist := MAX_DIST
@@ -51,8 +51,8 @@ func closest_dist(point yds_vec, spheres []sphere, planes []plane) (float64, int
 }
 
 func light_sphere(
-	point yds_vec,
-	ray yds_vec,
+	point vec_64,
+	ray vec_64,
 	sph sphere,
 	spheres []sphere,
 	planes []plane,
@@ -102,8 +102,8 @@ func light_sphere(
 }
 
 func light_plane(
-	point yds_vec,
-	ray yds_vec,
+	point vec_64,
+	ray vec_64,
 	pln plane,
 	spheres []sphere,
 	planes []plane,
@@ -153,11 +153,11 @@ func light_plane(
 }
 
 func march_ray_shadow(
-	point yds_vec,
+	point vec_64,
 	spheres []sphere,
 	planes []plane,
 	light light_source,
-	ldir yds_vec,
+	ldir vec_64,
 ) bool {
 	shadow := false
 

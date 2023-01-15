@@ -8,12 +8,12 @@ import (
 )
 
 func march_ray_camera(
-	origin yds_vec,
-	ray yds_vec,
+	origin vec_64,
+	ray vec_64,
 	spheres []sphere,
 	planes []plane,
 	lights []light_source,
-) yds_vec {
+) vec_64 {
 	r := r_min
 	point := vec_64_add(origin, vec_64_mul(ray, r))
 	color := vec_64_new(1, 1, 1)
